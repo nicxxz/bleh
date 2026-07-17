@@ -1,5 +1,5 @@
 -- FinancerUWU
--- flat black/monospace ledger-style UI, no card chrome, no gradients
+-- flat black ledger-style UI with a soft kawaii accent
 
 local FinancerUWU = {}
 FinancerUWU.__index = FinancerUWU
@@ -9,8 +9,6 @@ local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local lp = Players.LocalPlayer
 
--- monochrome. white is the only accent, and it's only ever used
--- functionally (active state / fill / focus), never decoratively.
 local col = {
 	bg      = Color3.fromRGB(8, 8, 8),
 	line    = Color3.fromRGB(34, 34, 34),
@@ -19,10 +17,11 @@ local col = {
 	sub     = Color3.fromRGB(110, 110, 110),
 	faint   = Color3.fromRGB(65, 65, 65),
 	white   = Color3.fromRGB(255, 255, 255),
-	red     = Color3.fromRGB(180, 60, 60),
+	pink    = Color3.fromRGB(255, 140, 195),
+	pinkdim = Color3.fromRGB(140, 80, 105),
 }
 
-local FAST = TweenInfo.new(0.12, Enum.EasingStyle.Linear)
+local FAST = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 local function tw(obj, props, info) TweenService:Create(obj, info or FAST, props):Play() end
 
 local function make(class, props, parent)
@@ -32,7 +31,7 @@ local function make(class, props, parent)
 	return i
 end
 
-local function hairline(parent, position, size, thick)
+local function hairline(parent, position, size)
 	return make("Frame", {
 		Size = size or UDim2.new(1, 0, 0, 1),
 		Position = position or UDim2.new(0, 0, 1, 0),
@@ -42,9 +41,8 @@ local function hairline(parent, position, size, thick)
 end
 
 local function pad(t, b, l, r, p) make("UIPadding", {PaddingTop=UDim.new(0,t), PaddingBottom=UDim.new(0,b), PaddingLeft=UDim.new(0,l), PaddingRight=UDim.new(0,r)}, p) end
-local function list(gap, p) make("UIListLayout", {Padding=UDim.new(0, gap or 0), SortOrder=Enum.SortOrder.LayoutOrder}, p) end
+local function list(gap, p) make("UIListLayout", {Padding=UDim.new(0, gap or 2), SortOrder=Enum.SortOrder.LayoutOrder}, p) end
 
--- spaces out a title so it reads like a printed ledger header
 local function tracked(s)
 	local out = {}
 	for c in s:gmatch(".") do table.insert(out, c) end
@@ -88,9 +86,8 @@ function FinancerUWU:CreateWindow(cfg)
 	}, sg)
 	make("UIStroke", {Color = col.line, Thickness = 1}, frame)
 
-	-- topbar: no gradient bar, no dot, just a breadcrumb + hairline rule
 	local topbar = make("Frame", {
-		Size = UDim2.new(1, 0, 0, 44),
+		Size = UDim2.new(1, 0, 0, 46),
 		BackgroundColor3 = col.bg,
 		BorderSizePixel = 0,
 		ZIndex = 2,
@@ -110,36 +107,36 @@ function FinancerUWU:CreateWindow(cfg)
 	}, topbar)
 
 	make("TextLabel", {
-		Text = "/ " .. sub,
+		Text = "/ " .. sub .. "  uwu",
 		Font = Enum.Font.Code,
 		TextSize = 12,
-		Size = UDim2.new(0, 200, 0, 14),
-		Position = UDim2.new(0, 16, 0, 24),
+		Size = UDim2.new(0, 220, 0, 14),
+		Position = UDim2.new(0, 16, 0, 25),
 		BackgroundTransparency = 1,
-		TextColor3 = col.sub,
+		TextColor3 = col.pinkdim,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		ZIndex = 4,
 	}, topbar)
 
 	local closebtn = make("TextButton", {
-		Text = "[x]",
+		Text = "(x)",
 		Font = Enum.Font.Code,
 		TextSize = 13,
-		Size = UDim2.new(0, 34, 0, 24),
-		Position = UDim2.new(1, -42, 0.5, -12),
+		Size = UDim2.new(0, 34, 0, 26),
+		Position = UDim2.new(1, -42, 0.5, -13),
 		BackgroundTransparency = 1,
 		TextColor3 = col.sub,
 		AutoButtonColor = false,
 		ZIndex = 5,
 	}, topbar)
 
-	closebtn.MouseEnter:Connect(function() tw(closebtn, {TextColor3 = col.red}) end)
+	closebtn.MouseEnter:Connect(function() tw(closebtn, {TextColor3 = col.pink}) end)
 	closebtn.MouseLeave:Connect(function() tw(closebtn, {TextColor3 = col.sub}) end)
 
 	local sidebarW = 128
 	local sidebar = make("Frame", {
-		Size = UDim2.new(0, sidebarW, 1, -45),
-		Position = UDim2.new(0, 0, 0, 45),
+		Size = UDim2.new(0, sidebarW, 1, -47),
+		Position = UDim2.new(0, 0, 0, 47),
 		BackgroundColor3 = col.bg,
 		BorderSizePixel = 0,
 	}, frame)
@@ -154,18 +151,17 @@ function FinancerUWU:CreateWindow(cfg)
 		CanvasSize = UDim2.new(0, 0, 0, 0),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y,
 	}, sidebar)
-	pad(10, 10, 0, 0, tabscroll)
-	list(0, tabscroll)
+	pad(12, 10, 0, 0, tabscroll)
+	list(4, tabscroll)
 
 	local contentholder = make("Frame", {
-		Size = UDim2.new(1, -sidebarW, 1, -49),
-		Position = UDim2.new(0, sidebarW, 0, 47),
+		Size = UDim2.new(1, -sidebarW, 1, -51),
+		Position = UDim2.new(0, sidebarW, 0, 49),
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		ClipsDescendants = true,
 	}, frame)
 
-	-- drag
 	local dragging, dragstart, startpos
 	topbar.InputBegan:Connect(function(inp)
 		if inp.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -186,9 +182,9 @@ function FinancerUWU:CreateWindow(cfg)
 		win.Visible = v
 		if v then
 			frame.Visible = true
-			tw(frame, {Size = UDim2.new(0, 560, 0, 400)}, TweenInfo.new(0.16, Enum.EasingStyle.Quad))
+			tw(frame, {Size = UDim2.new(0, 560, 0, 400)}, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out))
 		else
-			local t = TweenService:Create(frame, TweenInfo.new(0.14, Enum.EasingStyle.Quad), {Size = UDim2.new(0, 560, 0, 0)})
+			local t = TweenService:Create(frame, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 560, 0, 0)})
 			t:Play()
 			t.Completed:Connect(function() frame.Visible = false end)
 		end
@@ -211,19 +207,20 @@ function FinancerUWU:CreateWindow(cfg)
 		}, tabscroll)
 
 		local marker = make("Frame", {
-			Size = UDim2.new(0, 2, 0, 14),
-			Position = UDim2.new(0, 0, 0.5, -7),
-			BackgroundColor3 = col.white,
+			Size = UDim2.new(0, 6, 0, 6),
+			Position = UDim2.new(0, 2, 0.5, -3),
+			BackgroundColor3 = col.pink,
 			BackgroundTransparency = 1,
 			BorderSizePixel = 0,
 		}, row)
+		make("UICorner", {CornerRadius = UDim.new(1, 0)}, marker)
 
 		local tabbtn = make("TextButton", {
 			Text = string.upper(cfg2.Name or "tab"),
 			Font = Enum.Font.Code,
 			TextSize = 12,
-			Size = UDim2.new(1, -14, 1, 0),
-			Position = UDim2.new(0, 14, 0, 0),
+			Size = UDim2.new(1, -16, 1, 0),
+			Position = UDim2.new(0, 16, 0, 0),
 			BackgroundTransparency = 1,
 			TextColor3 = col.sub,
 			TextXAlignment = Enum.TextXAlignment.Left,
@@ -241,7 +238,7 @@ function FinancerUWU:CreateWindow(cfg)
 			AutomaticCanvasSize = Enum.AutomaticSize.Y,
 			Visible = false,
 		}, contentholder)
-		list(0, content)
+		list(3, content)
 
 		local function activate()
 			if activetab then
@@ -260,13 +257,13 @@ function FinancerUWU:CreateWindow(cfg)
 		table.insert(win.Tabs, tab)
 
 		function tab:AddSection(name)
-			local h = make("Frame", {Size = UDim2.new(1, 0, 0, 26), BackgroundTransparency = 1}, content)
+			local h = make("Frame", {Size = UDim2.new(1, 0, 0, 28), BackgroundTransparency = 1}, content)
 			make("TextLabel", {
 				Text = string.upper(name or "section"),
 				Font = Enum.Font.Code,
 				TextSize = 11,
 				Size = UDim2.new(1, 0, 0, 16),
-				Position = UDim2.new(0, 0, 0, 8),
+				Position = UDim2.new(0, 0, 0, 10),
 				BackgroundTransparency = 1,
 				TextColor3 = col.faint,
 				TextXAlignment = Enum.TextXAlignment.Left,
@@ -277,7 +274,7 @@ function FinancerUWU:CreateWindow(cfg)
 			c = c or {}
 			local row = make("TextButton", {
 				Text = "",
-				Size = UDim2.new(1, 0, 0, 34),
+				Size = UDim2.new(1, 0, 0, 36),
 				BackgroundTransparency = 1,
 				AutoButtonColor = false,
 			}, content)
@@ -292,19 +289,19 @@ function FinancerUWU:CreateWindow(cfg)
 				TextColor3 = col.text,
 				TextXAlignment = Enum.TextXAlignment.Left,
 			}, row)
-			local arrow = make("TextLabel", {
-				Text = "->",
+			local mark = make("TextLabel", {
+				Text = "<3",
 				Font = Enum.Font.Code,
-				TextSize = 13,
-				Size = UDim2.new(0, 24, 1, 0),
-				Position = UDim2.new(1, -24, 0, 0),
+				TextSize = 12,
+				Size = UDim2.new(0, 26, 1, 0),
+				Position = UDim2.new(1, -26, 0, 0),
 				BackgroundTransparency = 1,
 				TextColor3 = col.faint,
 				TextXAlignment = Enum.TextXAlignment.Right,
 			}, row)
 
-			row.MouseEnter:Connect(function() tw(arrow, {TextColor3 = col.white}) end)
-			row.MouseLeave:Connect(function() tw(arrow, {TextColor3 = col.faint}) end)
+			row.MouseEnter:Connect(function() tw(mark, {TextColor3 = col.pink}) end)
+			row.MouseLeave:Connect(function() tw(mark, {TextColor3 = col.faint}) end)
 			row.MouseButton1Click:Connect(function()
 				if c.Callback then pcall(c.Callback) end
 			end)
@@ -316,7 +313,7 @@ function FinancerUWU:CreateWindow(cfg)
 			local state = c.Default or false
 			local cb = c.Callback or function() end
 
-			local row = make("Frame", {Size = UDim2.new(1, 0, 0, 34), BackgroundTransparency = 1}, content)
+			local row = make("Frame", {Size = UDim2.new(1, 0, 0, 36), BackgroundTransparency = 1}, content)
 			hairline(row)
 			make("TextLabel", {
 				Text = c.Name or "Toggle",
@@ -332,10 +329,11 @@ function FinancerUWU:CreateWindow(cfg)
 			local box = make("Frame", {
 				Size = UDim2.new(0, 12, 0, 12),
 				Position = UDim2.new(1, -16, 0.5, -6),
-				BackgroundColor3 = state and col.white or col.bg,
+				BackgroundColor3 = state and col.pink or col.bg,
 				BorderSizePixel = 0,
 			}, row)
-			make("UIStroke", {Color = state and col.white or col.lineHi, Thickness = 1}, box)
+			make("UICorner", {CornerRadius = UDim.new(1, 0)}, box)
+			local boxstroke = make("UIStroke", {Color = state and col.pink or col.lineHi, Thickness = 1}, box)
 
 			local hit = make("TextButton", {Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Text = ""}, row)
 
@@ -343,8 +341,8 @@ function FinancerUWU:CreateWindow(cfg)
 			local function flip()
 				state = not state
 				T.Value = state
-				tw(box, {BackgroundColor3 = state and col.white or col.bg})
-				box.UIStroke.Color = state and col.white or col.lineHi
+				tw(box, {BackgroundColor3 = state and col.pink or col.bg})
+				boxstroke.Color = state and col.pink or col.lineHi
 				pcall(cb, state)
 			end
 			hit.MouseButton1Click:Connect(flip)
@@ -358,7 +356,7 @@ function FinancerUWU:CreateWindow(cfg)
 			local v = math.clamp(c.Default or mn, mn, mx)
 			local cb = c.Callback or function() end
 
-			local row = make("Frame", {Size = UDim2.new(1, 0, 0, 46), BackgroundTransparency = 1}, content)
+			local row = make("Frame", {Size = UDim2.new(1, 0, 0, 50), BackgroundTransparency = 1}, content)
 			hairline(row)
 
 			make("TextLabel", {
@@ -366,7 +364,7 @@ function FinancerUWU:CreateWindow(cfg)
 				Font = Enum.Font.Gotham,
 				TextSize = 13,
 				Size = UDim2.new(0.6, 0, 0, 18),
-				Position = UDim2.new(0, 2, 0, 2),
+				Position = UDim2.new(0, 2, 0, 4),
 				BackgroundTransparency = 1,
 				TextColor3 = col.text,
 				TextXAlignment = Enum.TextXAlignment.Left,
@@ -377,21 +375,21 @@ function FinancerUWU:CreateWindow(cfg)
 				Font = Enum.Font.Code,
 				TextSize = 13,
 				Size = UDim2.new(0.4, -2, 0, 18),
-				Position = UDim2.new(0.6, 0, 0, 2),
+				Position = UDim2.new(0.6, 0, 0, 4),
 				BackgroundTransparency = 1,
-				TextColor3 = col.white,
+				TextColor3 = col.pink,
 				TextXAlignment = Enum.TextXAlignment.Right,
 			}, row)
 
 			local track = make("Frame", {
-				Size = UDim2.new(1, -2, 0, 2),
-				Position = UDim2.new(0, 2, 1, -12),
+				Size = UDim2.new(1, -2, 0, 3),
+				Position = UDim2.new(0, 2, 1, -14),
 				BackgroundColor3 = col.line,
 				BorderSizePixel = 0,
 			}, row)
 
 			local pct = (v - mn) / (mx - mn)
-			local fill = make("Frame", {Size = UDim2.new(pct, 0, 1, 0), BackgroundColor3 = col.white, BorderSizePixel = 0}, track)
+			local fill = make("Frame", {Size = UDim2.new(pct, 0, 1, 0), BackgroundColor3 = col.pink, BorderSizePixel = 0}, track)
 
 			local S = {Value = v}
 			local sliding = false
@@ -429,7 +427,7 @@ function FinancerUWU:CreateWindow(cfg)
 		function tab:AddInput(c)
 			c = c or {}
 			local cb = c.Callback or function() end
-			local row = make("Frame", {Size = UDim2.new(1, 0, 0, 44), BackgroundTransparency = 1}, content)
+			local row = make("Frame", {Size = UDim2.new(1, 0, 0, 46), BackgroundTransparency = 1}, content)
 			hairline(row)
 
 			make("TextLabel", {
@@ -437,7 +435,7 @@ function FinancerUWU:CreateWindow(cfg)
 				Font = Enum.Font.Gotham,
 				TextSize = 13,
 				Size = UDim2.new(1, -4, 0, 16),
-				Position = UDim2.new(0, 2, 0, 2),
+				Position = UDim2.new(0, 2, 0, 4),
 				BackgroundTransparency = 1,
 				TextColor3 = col.text,
 				TextXAlignment = Enum.TextXAlignment.Left,
@@ -449,9 +447,9 @@ function FinancerUWU:CreateWindow(cfg)
 				Font = Enum.Font.Code,
 				TextSize = 13,
 				Size = UDim2.new(1, -4, 0, 18),
-				Position = UDim2.new(0, 2, 0, 20),
+				Position = UDim2.new(0, 2, 0, 22),
 				BackgroundTransparency = 1,
-				TextColor3 = col.white,
+				TextColor3 = col.pink,
 				PlaceholderColor3 = col.faint,
 				TextXAlignment = Enum.TextXAlignment.Left,
 				ClearTextOnFocus = false,
@@ -468,7 +466,7 @@ function FinancerUWU:CreateWindow(cfg)
 			local cb = c.Callback or function() end
 			local open = false
 
-			local row = make("Frame", {Size = UDim2.new(1, 0, 0, 34), BackgroundTransparency = 1, ClipsDescendants = false}, content)
+			local row = make("Frame", {Size = UDim2.new(1, 0, 0, 36), BackgroundTransparency = 1, ClipsDescendants = false}, content)
 			hairline(row)
 
 			make("TextLabel", {
@@ -489,7 +487,7 @@ function FinancerUWU:CreateWindow(cfg)
 				Size = UDim2.new(0.5, -2, 1, 0),
 				Position = UDim2.new(0.5, 0, 0, 0),
 				BackgroundTransparency = 1,
-				TextColor3 = col.white,
+				TextColor3 = col.pink,
 				TextXAlignment = Enum.TextXAlignment.Right,
 				AutoButtonColor = false,
 			}, row)
@@ -500,6 +498,7 @@ function FinancerUWU:CreateWindow(cfg)
 				BackgroundColor3 = col.bg,
 				BorderSizePixel = 0,
 				ClipsDescendants = true,
+				Visible = false,
 				ZIndex = 20,
 			}, row)
 			make("UIStroke", {Color = col.line, Thickness = 1}, df)
@@ -516,13 +515,15 @@ function FinancerUWU:CreateWindow(cfg)
 					AutoButtonColor = false,
 					ZIndex = 21,
 				}, df)
-				ob.MouseEnter:Connect(function() tw(ob, {TextColor3 = col.white}) end)
+				ob.MouseEnter:Connect(function() tw(ob, {TextColor3 = col.pink}) end)
 				ob.MouseLeave:Connect(function() tw(ob, {TextColor3 = col.sub}) end)
 				ob.MouseButton1Click:Connect(function()
 					sel = opt
 					selbtn.Text = "[" .. tostring(opt) .. "]"
 					open = false
-					tw(df, {Size = UDim2.new(0.5, -2, 0, 0)})
+					local closeT = TweenService:Create(df, FAST, {Size = UDim2.new(0.5, -2, 0, 0)})
+					closeT:Play()
+					closeT.Completed:Connect(function() df.Visible = false end)
 					pcall(cb, opt)
 				end)
 			end
@@ -530,7 +531,14 @@ function FinancerUWU:CreateWindow(cfg)
 			selbtn.MouseButton1Click:Connect(function()
 				open = not open
 				local h = dlist.AbsoluteContentSize.Y
-				tw(df, {Size = open and UDim2.new(0.5, -2, 0, h) or UDim2.new(0.5, -2, 0, 0)})
+				if open then
+					df.Visible = true
+					tw(df, {Size = UDim2.new(0.5, -2, 0, h)})
+				else
+					local closeT = TweenService:Create(df, FAST, {Size = UDim2.new(0.5, -2, 0, 0)})
+					closeT:Play()
+					closeT.Completed:Connect(function() df.Visible = false end)
+				end
 			end)
 
 			local D = {Value = sel}
@@ -544,7 +552,7 @@ function FinancerUWU:CreateWindow(cfg)
 			local cb = c.Callback or function() end
 			local listening = false
 
-			local row = make("Frame", {Size = UDim2.new(1, 0, 0, 34), BackgroundTransparency = 1}, content)
+			local row = make("Frame", {Size = UDim2.new(1, 0, 0, 36), BackgroundTransparency = 1}, content)
 			hairline(row)
 
 			make("TextLabel", {
@@ -565,7 +573,7 @@ function FinancerUWU:CreateWindow(cfg)
 				Size = UDim2.new(0.4, -2, 1, 0),
 				Position = UDim2.new(0.6, 0, 0, 0),
 				BackgroundTransparency = 1,
-				TextColor3 = col.white,
+				TextColor3 = col.pink,
 				TextXAlignment = Enum.TextXAlignment.Right,
 				AutoButtonColor = false,
 			}, row)
@@ -581,7 +589,7 @@ function FinancerUWU:CreateWindow(cfg)
 					listening = false
 					key = inp.KeyCode
 					kbtn.Text = "[" .. tostring(key.Name) .. "]"
-					kbtn.TextColor3 = col.white
+					kbtn.TextColor3 = col.pink
 				elseif not proc and inp.KeyCode == key then
 					pcall(cb)
 				end
@@ -593,7 +601,7 @@ function FinancerUWU:CreateWindow(cfg)
 		end
 
 		function tab:AddLabel(text)
-			local row = make("Frame", {Size = UDim2.new(1, 0, 0, 28), BackgroundTransparency = 1}, content)
+			local row = make("Frame", {Size = UDim2.new(1, 0, 0, 30), BackgroundTransparency = 1}, content)
 			make("TextLabel", {
 				Text = text or "",
 				Font = Enum.Font.Gotham,
@@ -621,7 +629,7 @@ function FinancerUWU:CreateWindow(cfg)
 			ZIndex = 200,
 		}, sg)
 		make("UIStroke", {Color = col.line, Thickness = 1}, nf)
-		make("Frame", {Size = UDim2.new(0, 3, 1, 0), BackgroundColor3 = col.white, BorderSizePixel = 0, ZIndex = 201}, nf)
+		make("Frame", {Size = UDim2.new(0, 3, 1, 0), BackgroundColor3 = col.pink, BorderSizePixel = 0, ZIndex = 201}, nf)
 
 		make("TextLabel", {
 			Text = c.Title or "notice",
@@ -648,10 +656,10 @@ function FinancerUWU:CreateWindow(cfg)
 			ZIndex = 201,
 		}, nf)
 
-		tw(nf, {Position = UDim2.new(1, -252, 1, -76)}, TweenInfo.new(0.18, Enum.EasingStyle.Quad))
+		tw(nf, {Position = UDim2.new(1, -252, 1, -76)}, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out))
 		task.delay(c.Duration or 3, function()
-			tw(nf, {Position = UDim2.new(1, 20, 1, -76)}, TweenInfo.new(0.16, Enum.EasingStyle.Quad))
-			task.wait(0.2)
+			tw(nf, {Position = UDim2.new(1, 20, 1, -76)}, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In))
+			task.wait(0.22)
 			pcall(function() nf:Destroy() end)
 		end)
 	end
